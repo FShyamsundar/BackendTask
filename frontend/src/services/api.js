@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const defaultApiBaseUrl = "https://backendtask-3czi.onrender.com/api/v1";
+const configuredApiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") || defaultApiBaseUrl;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://backendtask-3czi.onrender.com",
+  baseURL: configuredApiBaseUrl,
   headers: {
     "Content-Type": "application/json",
   },

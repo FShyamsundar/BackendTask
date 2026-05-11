@@ -11,7 +11,46 @@ const userRoutes = require("./routes/users");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+
+const normalizeOrigin = (origin) => origin.replace(/\/+$/, "");
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.CLIENT_URLS,
+]
+  .filter(Boolean)
+  .flatMap((value) => value.split(","))
+  .map((origin) => normalizeOrigin(origin.trim()))
+  .filter(Boolean);
+
+const allowedOriginPatterns = [
+  /^http:\/\/localhost(?::\d+)?$/,
+  /^https:\/\/.*\.vercel\.app$/,
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      const isExplicitlyAllowed = allowedOrigins.includes(normalizedOrigin);
+      const matchesPattern = allowedOriginPatterns.some((pattern) =>
+        pattern.test(normalizedOrigin),
+      );
+
+      if (!allowedOrigins.length || isExplicitlyAllowed || matchesPattern) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS"));
+    },
+  }),
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {
