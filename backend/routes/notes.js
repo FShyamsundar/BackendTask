@@ -112,7 +112,7 @@ router.delete(
       if (req.user.role !== "admin" && !note.owner.equals(req.user._id))
         return res.status(403).json({ message: "Forbidden" });
 
-      await note.remove();
+      await note.deleteOne();
       res.json({ message: "Note deleted" });
     } catch (error) {
       next(error);
